@@ -3,10 +3,12 @@ package org.example;
 import io.webfolder.cdp.session.SessionFactory;
 import io.webfolder.cdp.session.Session;
 
+import java.util.List;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import io.webfolder.cdp.type.target.TargetInfo;
 import java.net.Socket;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -52,18 +54,18 @@ public class Main {
 
         // cdp4j api
         try (SessionFactory factory = new SessionFactory("localhost", Integer.parseInt(debugPort))) {
-            // Management session (attached to the browser itself)
-            try (Session manage = factory.create()) {
-                String targetId = manage.getCommand().getTarget().createTarget("about:blank");
-                try (Session tab = factory.create(targetId)) {
-                    tab.navigate("https://www.eldorado.gg/");//target website
-                    tab.waitDocumentReady();
+            try (Session session = factory.create()) {
+                session.navigate("https://www.eldorado.gg/");
+                session.waitDocumentReady();
 
-                    var cookies = tab.getCommand().getNetwork().getCookies();
-                    cookies.forEach(c ->
-                            System.out.println(c.getName() + "=" + c.getValue())
-                    );
-                }
+                // format header
+                String cookieHeader = session.getCommand().getNetwork().getCookies()
+                        .stream()
+                        .map(c -> c.getName() + "=" + c.getValue())
+                        .collect(Collectors.joining("; "));
+
+                System.out.println("Cookies for session:");
+                System.out.println(cookieHeader);
             }
         }
     }
