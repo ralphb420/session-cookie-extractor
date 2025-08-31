@@ -35,11 +35,10 @@ public class Main {
                         "--remote-debugging-port=" + debugPort,
                         "--user-data-dir=" + userDataDir
                 );
-                pb.directory(new File("C:\\")); // optional working dir
+                pb.directory(new File("C:\\"));
                 pb.start();
                 System.out.println("Launched Browser in debug mode on port " + debugPort);
 
-                // Wait a bit to let Brave start up
                 Thread.sleep(3000);
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -51,13 +50,13 @@ public class Main {
 
 
 
-        // Now connect with cdp4j
+        // cdp4j api
         try (SessionFactory factory = new SessionFactory("localhost", Integer.parseInt(debugPort))) {
             // Management session (attached to the browser itself)
             try (Session manage = factory.create()) {
                 String targetId = manage.getCommand().getTarget().createTarget("about:blank");
                 try (Session tab = factory.create(targetId)) {
-                    tab.navigate("https://www.eldorado.gg/");
+                    tab.navigate("https://www.eldorado.gg/");//target website
                     tab.waitDocumentReady();
 
                     var cookies = tab.getCommand().getNetwork().getCookies();
